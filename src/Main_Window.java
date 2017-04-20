@@ -111,7 +111,7 @@ public class Main_Window extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         Btn_ChooseImage = new javax.swing.JButton();
         Btn_Insert = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        Btn_Update = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
@@ -187,11 +187,11 @@ public class Main_Window extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jButton3.setText("Update");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        Btn_Update.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        Btn_Update.setText("Update");
+        Btn_Update.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                Btn_UpdateActionPerformed(evt);
             }
         });
 
@@ -272,7 +272,7 @@ public class Main_Window extends javax.swing.JFrame {
                 .addGap(88, 88, 88)
                 .addComponent(Btn_Insert)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton3)
+                .addComponent(Btn_Update)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -316,7 +316,7 @@ public class Main_Window extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(Btn_Insert)
-                    .addComponent(jButton3)
+                    .addComponent(Btn_Update)
                     .addComponent(jButton4)
                     .addComponent(jButton8)
                     .addComponent(jButton9)
@@ -369,9 +369,53 @@ public class Main_Window extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_Btn_ChooseImageActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton3ActionPerformed
+    private void Btn_UpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_UpdateActionPerformed
+        if(checkInputs() && txt_Id.getText() !=null){
+            String UpdateQuery = null;
+            PreparedStatement ps = null;
+            Connection con = getConnection();
+            
+            //update without image
+            if(ImgPath == null){
+                try {
+                    UpdateQuery = "UPDATE products SET name =?, price = ?, add_date = ? WHERE id = ?";
+                    ps= con.prepareStatement(UpdateQuery);
+                    ps.setString(1,txt_Name.getText());
+                    ps.setString(2,txt_Price.getText());
+                    
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    String addDate = dateFormat.format(txt_AddDate.getDate());
+                    ps.setString(3,addDate);
+                    ps.setInt(4,Integer.parseInt(txt_Id.getText()));
+                } catch (SQLException ex) {
+                    Logger.getLogger(Main_Window.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            //Update with Image
+            else{
+                try{
+                   InputStream img = new FileInputStream(new File(ImgPath));
+                    
+                   UpdateQuery = "UPDATE products SET name =?, price = ?, add_date = ?, image = ? WHERE id = ?";
+                   ps= con.prepareStatement(UpdateQuery);
+                   ps.setString(1,txt_Name.getText());
+                   ps.setString(2,txt_Price.getText());
+                    
+                   SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                   String addDate = dateFormat.format(txt_AddDate.getDate());
+                   ps.setString(3,addDate);
+                   ps.setBlob(4,img);
+                   ps.setInt(5,Integer.parseInt(txt_Id.getText()));
+                   
+               }catch(Exception ex){
+                   JOptionPane.showMessageDialog(null, ex.getMessage());
+               }
+            }
+        }
+        else{
+            JOptionPane.showMessageDialog(null,"One or more fields are Empty or wrong");
+        }
+    }//GEN-LAST:event_Btn_UpdateActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
@@ -407,7 +451,7 @@ public class Main_Window extends javax.swing.JFrame {
                 InputStream img = new FileInputStream(new File(ImgPath));
                 ps.setBlob(4,img);
                 ps.executeUpdate();
-                JOptionPane.showMessageDialog(null, "Data");
+                JOptionPane.showMessageDialog(null, "Data Inserted");
                 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage());
@@ -456,9 +500,9 @@ public class Main_Window extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Btn_ChooseImage;
     private javax.swing.JButton Btn_Insert;
+    private javax.swing.JButton Btn_Update;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
-    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
