@@ -6,14 +6,18 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -33,6 +37,7 @@ public class Main_Window extends javax.swing.JFrame {
     public Main_Window() {
         initComponents();
         //getConnection();
+        Show_Products_in_JTable();
     }
     
     String ImgPath=null;
@@ -86,6 +91,51 @@ public class Main_Window extends javax.swing.JFrame {
                 
     }
     
+    //Display Data in JTable
+    //  1-Fill ArrayList with the Data
+    
+    public ArrayList<Product> getProductList(){
+            ArrayList<Product> productList = new ArrayList<Product>();
+            Connection con = getConnection();
+            String query = "SELECT * FROM products";
+            
+            Statement st;
+            ResultSet rs;
+        try {
+            st = con.createStatement();
+            rs = st.executeQuery(query);
+            Product product;
+            
+            while(rs.next()){
+                product = new Product(rs.getInt("id"),rs.getString("name"),Float.parseFloat(rs.getString("price")),rs.getString("add_date"),rs.getBytes("image"));
+                productList.add(product);
+                
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Main_Window.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return productList;
+    }
+    
+    
+    //  2-Populate the JTable
+    
+    public void Show_Products_in_JTable(){
+        ArrayList<Product> list = getProductList();
+        DefaultTableModel model = (DefaultTableModel)JTable_Products.getModel();
+        Object[] row = new Object[4];
+        for(int i=0; i<list.size(); i++){
+            row[0] = list.get(i).getId();
+            row[1] = list.get(i).getName();
+            row[2] = list.get(i).getPrice();
+            row[3] = list.get(i).getAddDate();
+            
+            model.addRow(row);
+            
+        }
+    }
+    
+    
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -108,11 +158,11 @@ public class Main_Window extends javax.swing.JFrame {
         txt_AddDate = new com.toedter.calendar.JDateChooser();
         lbl_Image = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        JTable_Products = new javax.swing.JTable();
         Btn_ChooseImage = new javax.swing.JButton();
         Btn_Insert = new javax.swing.JButton();
         Btn_Update = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        Btn_Delete = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
         jButton10 = new javax.swing.JButton();
@@ -161,7 +211,7 @@ public class Main_Window extends javax.swing.JFrame {
         txt_AddDate.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         txt_AddDate.setPreferredSize(new java.awt.Dimension(91, 28));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        JTable_Products.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -169,7 +219,7 @@ public class Main_Window extends javax.swing.JFrame {
                 "ID", "Name", "Price", "Add Date"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(JTable_Products);
 
         Btn_ChooseImage.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         Btn_ChooseImage.setText("Choose Image");
@@ -195,11 +245,11 @@ public class Main_Window extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jButton4.setText("Delete");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        Btn_Delete.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        Btn_Delete.setText("Delete");
+        Btn_Delete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                Btn_DeleteActionPerformed(evt);
             }
         });
 
@@ -274,7 +324,7 @@ public class Main_Window extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(Btn_Update)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton4)
+                .addComponent(Btn_Delete)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -317,7 +367,7 @@ public class Main_Window extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(Btn_Insert)
                     .addComponent(Btn_Update)
-                    .addComponent(jButton4)
+                    .addComponent(Btn_Delete)
                     .addComponent(jButton8)
                     .addComponent(jButton9)
                     .addComponent(jButton10)
@@ -406,6 +456,7 @@ public class Main_Window extends javax.swing.JFrame {
                    ps.setString(3,addDate);
                    ps.setBlob(4,img);
                    ps.setInt(5,Integer.parseInt(txt_Id.getText()));
+                   ps.executeUpdate();
                    
                }catch(Exception ex){
                    JOptionPane.showMessageDialog(null, ex.getMessage());
@@ -417,9 +468,24 @@ public class Main_Window extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_Btn_UpdateActionPerformed
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
+    private void Btn_DeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_DeleteActionPerformed
+        if(txt_Id.getText().equals("")){
+            try {
+                Connection con = getConnection();
+                PreparedStatement ps = con.prepareStatement("DELETE FROM products WHERE id = ?");
+                int id = Integer.parseInt(txt_Id.getText());
+                ps.setInt(1, id);
+                ps.executeUpdate();
+                JOptionPane.showMessageDialog(null,"Product Deleted");
+            } catch (SQLException ex) {
+                Logger.getLogger(Main_Window.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null,"Product Not Deleted");
+            }
+        }else{
+            JOptionPane.showMessageDialog(null,"Product Not Deleted : No Id to Delete");
+            
+        }
+    }//GEN-LAST:event_Btn_DeleteActionPerformed
 
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
         // TODO add your handling code here:
@@ -451,6 +517,8 @@ public class Main_Window extends javax.swing.JFrame {
                 InputStream img = new FileInputStream(new File(ImgPath));
                 ps.setBlob(4,img);
                 ps.executeUpdate();
+                Show_Products_in_JTable();
+                
                 JOptionPane.showMessageDialog(null, "Data Inserted");
                 
             } catch (Exception ex) {
@@ -499,11 +567,12 @@ public class Main_Window extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Btn_ChooseImage;
+    private javax.swing.JButton Btn_Delete;
     private javax.swing.JButton Btn_Insert;
     private javax.swing.JButton Btn_Update;
+    private javax.swing.JTable JTable_Products;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
     private javax.swing.JLabel jLabel1;
@@ -513,7 +582,6 @@ public class Main_Window extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JLabel lbl_Image;
     private com.toedter.calendar.JDateChooser txt_AddDate;
     private javax.swing.JTextField txt_Id;
