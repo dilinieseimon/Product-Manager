@@ -9,8 +9,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -135,6 +137,22 @@ public class Main_Window extends javax.swing.JFrame {
         }
     }
     
+    public void ShowItem(int index){
+        txt_Id.setText(Integer.toString(getProductList().get(index).getId()));
+        txt_Name.setText(getProductList().get(index).getName());
+        txt_Price.setText(Float.toString(getProductList().get(index).getPrice())); 
+        try {
+            Date addDate =  null;
+            addDate = new SimpleDateFormat("yyyy-MM-dd").parse((String)getProductList().get(index).getAddDate());
+            txt_AddDate.setDate(addDate);
+        } catch (ParseException ex) {
+            Logger.getLogger(Main_Window.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        lbl_Image.setIcon(ResizeImage(null,getProductList().get(index).getImage()));
+        
+    }
+    
     
     
     /**
@@ -219,6 +237,11 @@ public class Main_Window extends javax.swing.JFrame {
                 "ID", "Name", "Price", "Add Date"
             }
         ));
+        JTable_Products.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                JTable_ProductsMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(JTable_Products);
 
         Btn_ChooseImage.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
@@ -529,6 +552,11 @@ public class Main_Window extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, " One or More Fileds are Empty");
         }
     }//GEN-LAST:event_Btn_InsertActionPerformed
+
+    private void JTable_ProductsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JTable_ProductsMouseClicked
+        int index = JTable_Products.getSelectedRow();
+        ShowItem(index);
+    }//GEN-LAST:event_JTable_ProductsMouseClicked
 
     /**
      * @param args the command line arguments
